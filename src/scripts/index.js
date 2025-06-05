@@ -1,6 +1,11 @@
 import "../pages/index.css";
 import { initialCards } from "./cards";
-import { createCard } from "./components/card";
+import {
+  createCard,
+  deleteCard,
+  likeCard,
+  openeImage,
+} from "./components/card";
 import { openModal, closeModal } from "./components/modal";
 
 // @todo: Темплейт карточки
@@ -30,9 +35,7 @@ function profileFormSubmit(evt) {
   profileTitle.textContent = placeName.value;
   profileDescription.textContent = inputLink.value;
 
-  const popup = document.querySelector(".popup_is-opened");
-
-  closeModal(popup);
+  closeModal(popupTypeEdit);
 }
 
 function cardFormSubmit(evt) {
@@ -48,11 +51,9 @@ function cardFormSubmit(evt) {
     )
   );
 
-  const popup = document.querySelector(".popup_is-opened");
-  closeModal(popup);
+  closeModal(popupTypeNewCard);
 
-  placeName.value = "";
-  inputLink.value = "";
+  formNewCard.reset();
 }
 
 formEdit.addEventListener("submit", profileFormSubmit);
@@ -79,43 +80,6 @@ buttons.forEach((button) => {
 popups.forEach((popup) => {
   popup.classList.add("popup_is-animated");
 });
-
-document.addEventListener("click", (evt) => {
-  if (evt.target.classList.contains("popup__close")) {
-    const popup = evt.target.closest(".popup");
-    closeModal(popup);
-  }
-
-  if (evt.target.classList.contains("popup")) {
-    closeModal(evt.target);
-  }
-});
-
-document.addEventListener("keydown", (evt) => {
-  if (evt.key == "Escape") {
-    const popup = document.querySelector(".popup_is-opened");
-    if (popup) {
-      closeModal(popup);
-    }
-  }
-});
-
-function deleteCard(evt) {
-  evt.target.closest(".card").remove();
-}
-
-function likeCard(evt) {
-  evt.target.classList.toggle("card__like-button_is-active");
-}
-
-function openeImage(cardImage, popupTypeImage, cardContentObject, openModal) {
-  cardImage.addEventListener("click", () => {
-    popupTypeImage.querySelector(".popup__image").src = cardContentObject.link;
-    popupTypeImage.querySelector(".popup__caption").textContent =
-      cardContentObject.name;
-    openModal(popupTypeImage);
-  });
-}
 
 // @todo: Вывести карточки на страницу
 initialCards.forEach((cardContentObject) => {

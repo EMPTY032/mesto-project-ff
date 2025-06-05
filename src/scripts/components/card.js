@@ -13,12 +13,9 @@ function createCard(
 
   cardElement.querySelector(".card__image").src = cardContentObject.link;
 
-  openeImage(
-    cardElement.querySelector(".card__image"),
-    popupTypeImage,
-    cardContentObject,
-    openModal
-  );
+  cardElement.querySelector(".card__image").addEventListener("click", () => {
+    openeImage(cardContentObject);
+  });
 
   cardElement.querySelector(".card__title").textContent =
     cardContentObject.name;
@@ -33,4 +30,19 @@ function createCard(
   return cardElement;
 }
 
-export { createCard };
+function openeImage(cardContentObject) {
+  popupTypeImage.querySelector(".popup__image").src = cardContentObject.link;
+  popupTypeImage.querySelector(".popup__caption").textContent =
+    cardContentObject.name;
+  openModal(popupTypeImage);
+}
+
+function deleteCard(evt) {
+  evt.target.closest(".card").remove();
+}
+
+function likeCard(evt) {
+  evt.target.classList.toggle("card__like-button_is-active");
+}
+
+export { createCard, deleteCard, likeCard, openeImage };
