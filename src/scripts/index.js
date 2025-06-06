@@ -32,8 +32,8 @@ const inputLink = formNewCard.elements.link;
 function profileFormSubmit(evt) {
   evt.preventDefault();
 
-  profileTitle.textContent = placeName.value;
-  profileDescription.textContent = inputLink.value;
+  profileTitle.textContent = inputName.value;
+  profileDescription.textContent = inputDescription.value;
 
   closeModal(popupTypeEdit);
 }

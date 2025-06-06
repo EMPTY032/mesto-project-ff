@@ -1,23 +1,15 @@
 function openModal(popap) {
   popap.classList.add("popup_is-opened");
-  document.addEventListener("click", (evt) => {
-    clickClose(evt);
-  });
+  document.addEventListener("click", clickClose);
 
-  document.addEventListener("keydown", (evt) => {
-    keyClose(evt);
-  });
+  document.addEventListener("keydown", keyClose);
 }
 
 function closeModal(popap) {
   popap.classList.remove("popup_is-opened");
-  document.removeEventListener("click", (evt) => {
-    clickClose(evt);
-  });
+  document.removeEventListener("click", clickClose);
 
-  document.removeEventListener("keydown", (evt) => {
-    keyClose(evt);
-  });
+  document.removeEventListener("keydown", keyClose);
 }
 
 function clickClose(evt) {
