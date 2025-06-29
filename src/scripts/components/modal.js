@@ -1,13 +1,13 @@
 function openModal(popap) {
   popap.classList.add("popup_is-opened");
-  document.addEventListener("click", clickClose);
+  document.addEventListener("mousedown", clickClose);
 
   document.addEventListener("keydown", keyClose);
 }
 
 function closeModal(popap) {
   popap.classList.remove("popup_is-opened");
-  document.removeEventListener("click", clickClose);
+  document.removeEventListener("mousedown", clickClose);
 
   document.removeEventListener("keydown", keyClose);
 }

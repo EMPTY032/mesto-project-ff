@@ -10,8 +10,16 @@
   background: #000;
   border-radius: 2px;
   border: none;
-  transition: visibility 0s, background 0.3s;
+  transition: visibility 0s, background-color 0.3s, opacity 0.3s;
   margin-top: 48px;
+}
+
+.popup__button_inactive {
+  pointer-events: none;
+  opacity: 0.2;
+  border: 1px solid #000000;
+  background-color: transparent;
+  color: #000;
 }
 
 .popup__button:hover {

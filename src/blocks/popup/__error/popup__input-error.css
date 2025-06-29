@@ -1,0 +1,16 @@
+.popup__input-error {
+  z-index: 1;
+  position: absolute;
+  top: calc(100%+5px);
+  left: 0;
+  color: #f00;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: normal;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.popup__input-error_active {
+  opacity: 1;
+}
