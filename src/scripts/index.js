@@ -1,10 +1,5 @@
 import "../pages/index.css";
-import {
-  createCard,
-  deleteCard,
-  likeCard,
-  openeImage,
-} from "./components/card";
+import { createCard, deleteCard, likeCard } from "./components/card";
 import { openModal, closeModal } from "./components/modal";
 import { enableValidation, clearValidation } from "./validate";
 import { userInfo, cards, updateUserInfo, card, avatarPatch } from "./api";
@@ -15,9 +10,9 @@ const cardTemplate = document.querySelector("#card-template").content;
 const placesList = document.querySelector(".places__list");
 
 const popups = document.querySelectorAll(".popup");
-const buttons = document.querySelectorAll("button");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
+const popupTypeImage = document.querySelector(".popup_type_image");
 const popupTypeNewAvatar = document.querySelector(".popup_type_avatar");
 
 const formEdit = document.forms["edit-profile"];
@@ -34,51 +29,84 @@ const inputLink = formNewCard.elements.link;
 
 const formNewAvatar = document.forms["edit-avatar"];
 const avatarLink = formNewAvatar.elements["avatar-link"];
+const validationCongig = {
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  buttonSubmitSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_inactive",
+  inputErrorClass: "popup__input_error",
+  errorClass: "popup__input-error_active",
+};
 
-Promise.all([userInfo, cards]).then(([user, cards]) => {
-  profileTitle.textContent = user.name;
-  profileDescription.textContent = user.about;
-  profileAvatar.style.backgroundImage = `url(${user.avatar})`;
+Promise.all([userInfo, cards])
+  .then(([user, cards]) => {
+    profileTitle.textContent = user.name;
+    profileDescription.textContent = user.about;
+    profileAvatar.style.backgroundImage = `url(${user.avatar})`;
 
-  // @todo: Вывести карточки на страницу
-  cards.forEach((cardContentObject) => {
-    placesList.append(
-      createCard(
-        cardContentObject,
-        deleteCard,
-        cardTemplate,
-        likeCard,
-        openeImage,
-        user
-      )
-    );
+    // @todo: Вывести карточки на страницу
+    cards.forEach((cardContentObject) => {
+      placesList.append(
+        createCard(
+          cardContentObject,
+          deleteCard,
+          cardTemplate,
+          likeCard,
+          openeImage,
+          popupTypeImage,
+          user
+        )
+      );
+    });
+  })
+  .catch((err) => {
+    console.error(err);
   });
-});
 
 function profileFormSubmit(evt) {
   evt.preventDefault();
   console.log(evt.target);
   renderLoading(evt.target.querySelector(".popup__button"), true);
-  updateUserInfo(inputName, inputDescription).then((result) => {
-    profileTitle.textContent = result.name;
-    profileDescription.textContent = result.about;
-    renderLoading(evt.target.querySelector(".popup__button"), false);
-    closeModal(popupTypeEdit);
-  });
+  updateUserInfo(inputName, inputDescription)
+    .then((result) => {
+      profileTitle.textContent = result.name;
+      profileDescription.textContent = result.about;
+      closeModal(popupTypeEdit);
+    })
+    .catch((err) => {
+      console.error(err);
+    })
+    .finally(() => {
+      renderLoading(evt.target.querySelector(".popup__button"), false);
+    });
 }
 
 function cardFormSubmit(evt) {
   evt.preventDefault();
   renderLoading(evt.target.querySelector(".popup__button"), true);
 
-  Promise.all([userInfo, card(placeName, inputLink)]).then(([user, card]) => {
-    placesList.prepend(
-      createCard(card, deleteCard, cardTemplate, likeCard, openeImage, user)
-    );
-    renderLoading(evt.target.querySelector(".popup__button"), false);
-    closeModal(popupTypeNewCard);
-    formNewCard.reset();
-  });
+  Promise.all([userInfo, card(placeName, inputLink)])
+    .then(([user, card]) => {
+      placesList.prepend(
+        createCard(
+          card,
+          deleteCard,
+          cardTemplate,
+          likeCard,
+          openeImage,
+          popupTypeImage,
+          user
+        )
+      );
+      closeModal(popupTypeNewCard);
+      formNewCard.reset();
+    })
+    .catch((err) => {
+      console.error(err);
+    })
+    .finally(() => {
+      renderLoading(evt.target.querySelector(".popup__button"), false);
+    });
 }
 
 function avatarFormSubmit(evt) {
@@ -88,77 +116,71 @@ function avatarFormSubmit(evt) {
   avatarPatch(avatarLink)
     .then((result) => {
       profileAvatar.style.backgroundImage = `url(${result.avatar})`;
-      renderLoading(evt.target.querySelector(".popup__button"), false);
       closeModal(popupTypeNewAvatar);
       formNewAvatar.reset();
     })
     .catch((err) => {
+      console.error(err);
+    })
+    .finally(() => {
       renderLoading(evt.target.querySelector(".popup__button"), false);
-      alert(err);
     });
 }
 
-formEdit.addEventListener("submit", profileFormSubmit);
+function openeImage(cardContentObject, popupTypeImage) {
+  popupTypeImage.querySelector(".popup__image").src = cardContentObject.link;
+  popupTypeImage.querySelector(
+    ".popup__image"
+  ).alt = `Фотография места${cardContentObject.name}`;
+  popupTypeImage.querySelector(".popup__caption").textContent =
+    cardContentObject.name;
+  openModal(popupTypeImage);
+}
 
-formNewCard.addEventListener("submit", cardFormSubmit);
+formEdit.addEventListener("submit", (evt) => {
+  evt.preventDefault();
 
-formNewAvatar.addEventListener("submit", avatarFormSubmit);
+  profileFormSubmit(evt);
+});
 
-buttons.forEach((button) => {
-  switch (button.classList.value) {
-    case "profile__edit-button":
-      button.addEventListener("click", () => {
-        inputName.value = profileTitle.textContent;
-        inputDescription.value = profileDescription.textContent;
-        clearValidation(formEdit, {
-          inputSelector: ".popup__input",
-          buttonSubmitSelector: ".popup__button",
-          inactiveButtonClass: "popup__button_inactive",
-          inputErrorClass: "popup__input_error",
-          errorClass: "popup__input-error_active",
-        });
-        openModal(popupTypeEdit);
-      });
-      break;
-    case "profile__add-button":
-      button.addEventListener("click", () => {
-        clearValidation(formNewCard, {
-          inputSelector: ".popup__input",
-          buttonSubmitSelector: ".popup__button",
-          inactiveButtonClass: "popup__button_inactive",
-          inputErrorClass: "popup__input_error",
-          errorClass: "popup__input-error_active",
-        });
-        openModal(popupTypeNewCard);
-      });
-      break;
-    case "profile__overlay":
-      button.addEventListener("click", () => {
-        clearValidation(formNewAvatar, {
-          inputSelector: ".popup__input",
-          buttonSubmitSelector: ".popup__button",
-          inactiveButtonClass: "popup__button_inactive",
-          inputErrorClass: "popup__input_error",
-          errorClass: "popup__input-error_active",
-        });
-        openModal(popupTypeNewAvatar);
-      });
-      break;
-  }
+formNewCard.addEventListener("submit", (evt) => {
+  evt.preventDefault();
+
+  cardFormSubmit(evt);
+});
+
+formNewAvatar.addEventListener("submit", (evt) => {
+  evt.preventDefault();
+
+  avatarFormSubmit(evt);
+});
+
+document
+  .querySelector(".profile__edit-button")
+  .addEventListener("click", () => {
+    inputName.value = profileTitle.textContent;
+    inputDescription.value = profileDescription.textContent;
+    clearValidation(formEdit, validationCongig);
+    openModal(popupTypeEdit);
+  });
+
+document.querySelector(".profile__add-button").addEventListener("click", () => {
+  placeName.value = "";
+  inputLink.value = "";
+  clearValidation(formNewCard, validationCongig);
+  openModal(popupTypeNewCard);
+});
+
+document.querySelector(".profile__overlay").addEventListener("click", () => {
+  clearValidation(formNewAvatar, validationCongig);
+  openModal(popupTypeNewAvatar);
 });
 
 popups.forEach((popup) => {
   popup.classList.add("popup_is-animated");
 });
 
-enableValidation({
-  formSelector: ".popup__form",
-  inputSelector: ".popup__input",
-  buttonSubmitSelector: ".popup__button",
-  inactiveButtonClass: "popup__button_inactive",
-  inputErrorClass: "popup__input_error",
-  errorClass: "popup__input-error_active",
-});
+enableValidation(validationCongig);
 
 function renderLoading(element, isLoading) {
   if (isLoading) {

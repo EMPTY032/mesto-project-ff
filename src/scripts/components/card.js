@@ -1,7 +1,4 @@
-import { openModal } from "./modal";
-import { deletedCardApi } from "../api";
-
-const popupTypeImage = document.querySelector(".popup_type_image");
+import { like, deleteLike, deletedCardApi } from "../api";
 
 function createCard(
   cardContentObject,
@@ -9,14 +6,18 @@ function createCard(
   cardTemplate,
   likeCard,
   openeImage,
+  popupTypeImage,
   userObject
 ) {
   const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
 
   cardElement.querySelector(".card__image").src = cardContentObject.link;
+  cardElement.querySelector(
+    ".card__image"
+  ).alt = `Фотография места${cardContentObject.name}`;
 
   cardElement.querySelector(".card__image").addEventListener("click", () => {
-    openeImage(cardContentObject);
+    openeImage(cardContentObject, popupTypeImage);
   });
 
   cardElement.querySelector(".card__title").textContent =
@@ -25,7 +26,7 @@ function createCard(
   cardElement.querySelector(".card__like-curent").textContent =
     cardContentObject.likes.length;
 
-  cardContentObject.likes.forEach((like) => {
+  cardContentObject.likes.some((like) => {
     if (like._id == userObject._id) {
       cardElement
         .querySelector(".card__like-button")
@@ -56,46 +57,40 @@ function createCard(
   return cardElement;
 }
 
-function openeImage(cardContentObject) {
-  popupTypeImage.querySelector(".popup__image").src = cardContentObject.link;
-  popupTypeImage.querySelector(".popup__caption").textContent =
-    cardContentObject.name;
-  openModal(popupTypeImage);
-}
-
 function deleteCard(evt, cardID) {
-  evt.target.closest(".card").remove();
-  deletedCardApi(cardID);
+  deletedCardApi(cardID)
+    .then(() => {
+      evt.target.closest(".card").remove();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 }
 
 function likeCard(evt, cardID, cardTitle) {
-  evt.target.classList.toggle("card__like-button_is-active");
-  console.log(evt.target.classList.contains("card__like-button_is-active"));
-  if (evt.target.classList.contains("card__like-button_is-active")) {
-    console.log("лайк будет поставлен");
-    fetch(`https://nomoreparties.co/v1/wff-cohort-41/cards/likes/${cardID}`, {
-      method: "PUT",
-      headers: {
-        authorization: "f0663ea4-8267-4f20-8b18-ca4f99c82059",
-      },
-    })
-      .then((res) => res.json())
+  if (!evt.target.classList.contains("card__like-button_is-active")) {
+    like(cardID)
       .then((res) => {
+        toggleLike(evt);
         cardTitle.textContent = res.likes.length;
+      })
+      .catch((err) => {
+        console.error(err);
       });
   } else {
-    console.log("лайк будет удален");
-    fetch(`https://nomoreparties.co/v1/wff-cohort-41/cards/likes/${cardID}`, {
-      method: "DELETE",
-      headers: {
-        authorization: "f0663ea4-8267-4f20-8b18-ca4f99c82059",
-      },
-    })
-      .then((res) => res.json())
+    deleteLike(cardID)
       .then((res) => {
+        toggleLike(evt);
         cardTitle.textContent = res.likes.length;
+      })
+      .catch((err) => {
+        console.error(err);
       });
   }
 }
 
-export { createCard, deleteCard, likeCard, openeImage };
+function toggleLike(evt) {
+  evt.target.classList.toggle("card__like-button_is-active");
+}
+
+export { createCard, deleteCard, likeCard };

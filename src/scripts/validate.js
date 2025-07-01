@@ -4,10 +4,6 @@ function enableValidation(validityObject) {
   );
 
   formList.forEach((formElement) => {
-    formElement.addEventListener("submit", (evt) => {
-      evt.preventDefault();
-    });
-
     setEventListener(validityObject, formElement);
   });
 }
@@ -89,9 +85,9 @@ function hideInputError(
 
 function toggleButtonState(inputList, buttonSubmit, inactiveButtonClass) {
   if (hasInvalidInput(inputList)) {
-    buttonSubmit.classList.add(inactiveButtonClass);
+    disableSubmitButton(buttonSubmit, inactiveButtonClass);
   } else {
-    buttonSubmit.classList.remove(inactiveButtonClass);
+    enableSubmitButton(buttonSubmit, inactiveButtonClass);
   }
 }
 
@@ -99,6 +95,16 @@ function hasInvalidInput(inputList) {
   return inputList.some((inputElement) => {
     return !inputElement.validity.valid;
   });
+}
+
+function disableSubmitButton(buttonSubmit, inactiveButtonClass) {
+  buttonSubmit.classList.add(inactiveButtonClass);
+  buttonSubmit.disabled = true;
+}
+
+function enableSubmitButton(buttonSubmit, inactiveButtonClass) {
+  buttonSubmit.classList.remove(inactiveButtonClass);
+  buttonSubmit.disabled = false;
 }
 
 function clearValidation(profileForm, validationConfig) {
@@ -109,11 +115,7 @@ function clearValidation(profileForm, validationConfig) {
     validationConfig.buttonSubmitSelector
   );
 
-  toggleButtonState(
-    inputList,
-    buttonElement,
-    validationConfig.inactiveButtonClass
-  );
+  disableSubmitButton(buttonElement, validationConfig.inactiveButtonClass);
 
   inputList.forEach((inputElement) => {
     hideInputError(
