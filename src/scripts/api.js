@@ -9,7 +9,7 @@ const userInfo = fetch("https://nomoreparties.co/v1/wff-cohort-41/users/me", {
   headers: config.headers,
 }).then(getResponseData);
 
-const cards = fetch("https://nomoreparties.co/v1/wff-cohort-41/cards", {
+const getCards = fetch("https://nomoreparties.co/v1/wff-cohort-41/cards", {
   headers: {
     authorization: config.headers.authorization,
   },
@@ -26,7 +26,7 @@ const updateUserInfo = (inputName, inputDescription) => {
   }).then(getResponseData);
 };
 
-const card = (placeName = "ошибка", inputLink = "ошибка") => {
+const postCard = (placeName = "ошибка", inputLink = "ошибка") => {
   return fetch("https://nomoreparties.co/v1/wff-cohort-41/cards", {
     method: "POST",
     headers: config.headers,
@@ -53,7 +53,7 @@ const like = (cardID) => {
     {
       method: "PUT",
       headers: {
-        authorization: "f0663ea4-8267-4f20-8b18-ca4f99c82059",
+        authorization: config.headers.authorization,
       },
     }
   ).then(getResponseData);
@@ -65,7 +65,7 @@ const deleteLike = (cardID) => {
     {
       method: "DELETE",
       headers: {
-        authorization: "f0663ea4-8267-4f20-8b18-ca4f99c82059",
+        authorization: config.headers.authorization,
       },
     }
   ).then(getResponseData);
@@ -90,9 +90,9 @@ function getResponseData(res) {
 
 export {
   userInfo,
-  cards,
+  getCards,
   updateUserInfo,
-  card,
+  postCard,
   avatarPatch,
   like,
   deleteLike,

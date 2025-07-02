@@ -2,7 +2,13 @@ import "../pages/index.css";
 import { createCard, deleteCard, likeCard } from "./components/card";
 import { openModal, closeModal } from "./components/modal";
 import { enableValidation, clearValidation } from "./validate";
-import { userInfo, cards, updateUserInfo, card, avatarPatch } from "./api";
+import {
+  userInfo,
+  getCards,
+  updateUserInfo,
+  postCard,
+  avatarPatch,
+} from "./api";
 
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content;
@@ -38,7 +44,7 @@ const validationCongig = {
   errorClass: "popup__input-error_active",
 };
 
-Promise.all([userInfo, cards])
+Promise.all([userInfo, getCards])
   .then(([user, cards]) => {
     profileTitle.textContent = user.name;
     profileDescription.textContent = user.about;
@@ -85,8 +91,8 @@ function cardFormSubmit(evt) {
   evt.preventDefault();
   renderLoading(evt.target.querySelector(".popup__button"), true);
 
-  Promise.all([userInfo, card(placeName, inputLink)])
-    .then(([user, card]) => {
+  postCard(placeName, inputLink)
+    .then((card) => {
       placesList.prepend(
         createCard(
           card,
@@ -95,7 +101,7 @@ function cardFormSubmit(evt) {
           likeCard,
           openeImage,
           popupTypeImage,
-          user
+          userInfo
         )
       );
       closeModal(popupTypeNewCard);
@@ -138,20 +144,14 @@ function openeImage(cardContentObject, popupTypeImage) {
 }
 
 formEdit.addEventListener("submit", (evt) => {
-  evt.preventDefault();
-
   profileFormSubmit(evt);
 });
 
 formNewCard.addEventListener("submit", (evt) => {
-  evt.preventDefault();
-
   cardFormSubmit(evt);
 });
 
 formNewAvatar.addEventListener("submit", (evt) => {
-  evt.preventDefault();
-
   avatarFormSubmit(evt);
 });
 
